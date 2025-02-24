@@ -1,0 +1,37 @@
+{% extends "layout/base.html" %}
+
+{% block title %}Детали промпта{% endblock %}
+
+{% block content %}
+  <div class="container">
+    <h1 class="mb-4">{{ prompt.title }}</h1>
+
+    <div class="mb-3">
+      <h5>Модель API:</h5>
+      <p>{{ prompt.model }}</p>
+    </div>
+
+    <div class="mb-3">
+      <h5>Системное сообщение (developer role):</h5>
+      <p>{{ prompt.developer_content }}</p>
+    </div>
+
+    <div class="mb-3">
+      <h5>Контент от пользователя (user role):</h5>
+      <p>{{ prompt.user_content }}</p>
+    </div>
+
+    <div class="mb-3">
+      <h5>Temperature:</h5>
+      <p>{{ prompt.temperature }}</p>
+    </div>
+
+    <div class="mb-3">
+      <h5>Max Tokens:</h5>
+      <p>{{ prompt.max_tokens }}</p>
+    </div>
+
+    <a href="{% url 'prompt_design:prompt_list' %}" class="btn btn-secondary">Назад</a>
+    <a href="{% url 'prompt_design:prompt_edit' prompt.pk %}" class="btn btn-primary">Редактировать</a>
+  </div>
+{% endblock %}

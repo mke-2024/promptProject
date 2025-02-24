@@ -1,0 +1,105 @@
+{% extends "layout/base.html" %}
+
+{% block title %}Список промптів{% endblock %}
+
+{% block content %}
+  <div class="container">
+    <h1 class="mb-4">Список промптів</h1>
+    <a href="{% url 'prompt_design:prompt_create' %}" class="btn btn-primary mb-3">Створити новий промпт</a>
+
+    {% if prompts %}
+      <table class="table table-striped">
+        <thead>
+          <tr>
+            <th>Заголовок</th>
+            <th>Модель</th>
+            <th>Дата створення</th>
+            <th>Дії</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for prompt in prompts %}
+            <tr id="prompt-row-{{ prompt.id }}">
+              <td><a href="{% url 'prompt_design:prompt_detail' prompt.id %}">{{ prompt.title }}</a></td>
+              <td>{{ prompt.model }}</td>
+              <td>{{ prompt.created_at|date:"Y-m-d H:i" }}</td>
+              <td>
+                <a href="{% url 'prompt_design:prompt_edit' prompt.id %}" class="btn btn-sm btn-warning">Редагувати</a>
+                <button class="btn btn-sm btn-danger delete-prompt" data-id="{{ prompt.id }}" data-title="{{ prompt.title }}">Видалити</button>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <p>Промптів поки немає. Створіть новий!</p>
+    {% endif %}
+  </div>
+
+  <!-- Модальное окно подтверждения удаления -->
+  <div class="modal fade" id="deletePromptModal" tabindex="-1" aria-labelledby="deletePromptModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="deletePromptModalLabel">Підтвердження видалення</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрити"></button>
+        </div>
+        <div class="modal-body">
+          <p>Ви впевнені, що хочете видалити промпт <strong id="deletePromptTitle"></strong>?</p>
+          <p class="text-danger"><small>Цю дію неможливо скасувати!</small></p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Скасувати</button>
+          <button type="button" class="btn btn-danger" id="confirmDeletePrompt">Видалити</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function() {
+        let selectedPromptId = null;
+        let deleteModal = new bootstrap.Modal(document.getElementById("deletePromptModal"));
+
+        document.querySelectorAll(".delete-prompt").forEach(button => {
+            button.addEventListener("click", function() {
+                selectedPromptId = this.getAttribute("data-id");
+                let promptTitle = this.getAttribute("data-title");
+
+                document.getElementById("deletePromptTitle").textContent = promptTitle;
+                deleteModal.show();
+            });
+        });
+
+        document.getElementById("confirmDeletePrompt").addEventListener("click", function() {
+            if (!selectedPromptId) return;
+
+            let deleteButton = document.querySelector(`button[data-id='${selectedPromptId}']`);
+            deleteButton.disabled = true;
+
+            fetch(`/prompts/${selectedPromptId}/delete/`, {
+                method: "POST",
+                headers: {
+                    "X-CSRFToken": "{{ csrf_token }}",
+                    "Content-Type": "application/json"
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === "success") {
+                    document.getElementById(`prompt-row-${selectedPromptId}`).remove();
+                    deleteModal.hide();
+                } else {
+                    console.error("Помилка видалення:", data.message);
+                }
+            })
+            .catch(error => {
+                console.error("Помилка при видаленні:", error);
+            })
+            .finally(() => {
+                deleteButton.disabled = false;
+            });
+        });
+    });
+  </script>
+{% endblock %}

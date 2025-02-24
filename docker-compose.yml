@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    container_name: django_app
+    restart: always
+    volumes:
+      - .:/app
+      - static_volume:/app/static
+      - db_volume:/app/db  # Подключаем volume для базы данных SQLite
+    ports:
+      - "8000:8000"
+    command: ["gunicorn", "--bind", "0.0.0.0:8000", "promptProject.wsgi:application"]
+
+  nginx:
+    image: nginx:latest
+    container_name: nginx_server
+    restart: always
+    depends_on:
+      - web
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf
+      - static_volume:/app/static
+    ports:
+      - "80:80"
+
+volumes:
+  static_volume:
+  db_volume:  # Создаем volume для SQLite

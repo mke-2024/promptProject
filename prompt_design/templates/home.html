@@ -1,0 +1,11 @@
+{% extends "layout/base.html" %}
+
+{% block title %}Добро пожаловать{% endblock %}
+
+{% block content %}
+<div class="container text-center fade-in">
+    <h1 class="display-4">Добро пожаловать в Промпти</h1>
+    <p class="lead">Войдите, чтобы начать работу с системой.</p>
+    <a href="{% url 'login' %}" class="btn btn-primary btn-lg">Войти</a>
+</div>
+{% endblock %}

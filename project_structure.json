@@ -1,0 +1,61 @@
+{
+    "promptProject": [
+        ".env",
+        ".gitignore",
+        "README.md",
+        {
+            "core": [
+                "utils.py"
+            ]
+        },
+        {
+            "data": []
+        },
+        "db.sqlite3",
+        "manage.py",
+        "project_structure.txt",
+        {
+            "promptProject": [
+                "__init__.py",
+                "settings.py",
+                "urls.py",
+                "wsgi.py"
+            ]
+        },
+        {
+            "prompt_design": [
+                "__init__.py",
+                "admin.py",
+                "apps.py",
+                "forms.py",
+                "models.py",
+                {
+                    "templates": [
+                        {
+                            "authentication": [
+                                "login.html",
+                                "register.html"
+                            ]
+                        },
+                        "home.html",
+                        {
+                            "layout": [
+                                "base.html"
+                            ]
+                        },
+                        {
+                            "prompt_design": [
+                                "prompt_detail.html",
+                                "prompt_form.html",
+                                "prompt_list.html"
+                            ]
+                        }
+                    ]
+                },
+                "tests.py",
+                "urls.py",
+                "views.py"
+            ]
+        }
+    ]
+}

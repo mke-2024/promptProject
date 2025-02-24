@@ -1,0 +1,204 @@
+{% extends "layout/base.html" %}
+
+{% block title %}{% if edit_mode %}Редактирование{% else %}Создание{% endif %} промпта{% endblock %}
+
+{% block content %}
+  <div class="container">
+    <h1 class="mb-4">{% if edit_mode %}Редактирование{% else %}Создание{% endif %} промпта</h1>
+
+    <form id="promptForm" method="post">
+      {% csrf_token %}
+      <input type="hidden" name="prompt_id" value="{{ prompt.id|default:'' }}">
+
+      <div class="mb-3">
+        {{ form.title.label_tag }}
+        {{ form.title }}
+      </div>
+      <div class="mb-3">
+        {{ form.model.label_tag }}
+        {{ form.model }}
+      </div>
+      <div class="mb-3">
+        {{ form.developer_content.label_tag }}
+        {{ form.developer_content }}
+      </div>
+      <div class="mb-3">
+        {{ form.user_content.label_tag }}
+        {{ form.user_content }}
+      </div>
+
+      <!-- Поле "Инструкция препарата" с кнопкой очистки -->
+      <div class="mb-3 position-relative">
+        {{ form.drug_instruction.label_tag }}
+        <div class="d-flex">
+          {{ form.drug_instruction }}
+          <button type="button" class="btn btn-outline-danger ms-2" id="clearInstruction" style="display: none;">
+            Очистить
+          </button>
+        </div>
+      </div>
+
+      <div class="mb-3">
+        {{ form.temperature.label_tag }}
+        {{ form.temperature }}
+      </div>
+      <div class="mb-3">
+        {{ form.max_tokens.label_tag }}
+        {{ form.max_tokens }}
+      </div>
+
+      <button type="submit" class="btn btn-success">Сохранить</button>
+      <button type="button" class="btn btn-info" id="testPrompt">Протестировать</button>
+
+      <!-- Спиннер (изначально скрыт) -->
+      <div id="spinner-container" class="text-center mt-3" style="display: none;">
+        <div class="spinner-border text-primary" role="status" style="width: 4rem; height: 4rem;">
+          <span class="visually-hidden">Загрузка...</span>
+        </div>
+        <p class="mt-2">Тестирование выполняется, подождите...</p>
+      </div>
+
+      <p id="error-message" class="text-danger mt-3" style="display: none;">Пожалуйста, заполните все обязательные поля.</p>
+    </form>
+
+    <a href="{% url 'prompt_design:prompt_list' %}" class="btn btn-secondary mt-3">Назад</a>
+  </div>
+
+  <!-- Модальное окно для результата тестирования -->
+  <div class="modal fade" id="testModal" tabindex="-1" aria-labelledby="testModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="testModalLabel">Результат тестирования</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+        </div>
+        <div class="modal-body">
+          <div class="text-muted small mb-2">
+            <strong>Status:</strong> <span id="apiStatus">Загрузка...</span> |
+            <strong>Prompt ID:</strong> <span id="apiPromptId">Загрузка...</span>
+          </div>
+          <pre id="apiResponse" class="p-3 bg-light border rounded" style="white-space: pre-wrap; word-wrap: break-word; max-height: 500px; overflow-y: auto;">Загрузка...</pre>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Модальное окно для ошибок -->
+  <div class="modal fade" id="errorModal" tabindex="-1" aria-labelledby="errorModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header bg-danger text-white">
+          <h5 class="modal-title" id="errorModalLabel">Ошибка</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+        </div>
+        <div class="modal-body">
+          <p id="errorMessage">Неизвестная ошибка</p>
+          <pre id="errorDetails" class="p-3 bg-light border rounded" style="white-space: pre-wrap; word-wrap: break-word; max-height: 400px; overflow-y: auto;"></pre>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function validateForm(isTesting = false) {
+        let isValid = true;
+        // Проверяем обязательные поля, имеющие атрибут required (если таковые заданы в форме)
+        let requiredFields = document.querySelectorAll("#promptForm [required]");
+        requiredFields.forEach(field => {
+            if (!field.value.trim()) {
+                isValid = false;
+                field.classList.add("is-invalid");
+            } else {
+                field.classList.remove("is-invalid");
+            }
+        });
+
+        // Если тестирование, также проверяем поле "Инструкция препарата"
+        if (isTesting) {
+            let drugInstructionField = document.querySelector("[name='drug_instruction']");
+            if (!drugInstructionField.value.trim()) {
+                isValid = false;
+                drugInstructionField.classList.add("is-invalid");
+            } else {
+                drugInstructionField.classList.remove("is-invalid");
+            }
+        }
+
+        document.getElementById("error-message").style.display = isValid ? "none" : "block";
+        return isValid;
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+        let instructionField = document.querySelector("[name='drug_instruction']");
+        let clearButton = document.getElementById("clearInstruction");
+
+        function updateClearButtonVisibility() {
+            clearButton.style.display = instructionField.value.trim() ? "block" : "none";
+        }
+
+        instructionField.addEventListener("input", updateClearButtonVisibility);
+
+        clearButton.addEventListener("click", function () {
+            instructionField.value = "";
+            updateClearButtonVisibility();
+        });
+
+        updateClearButtonVisibility(); // Проверяем при загрузке
+
+        document.getElementById("testPrompt").addEventListener("click", function () {
+            console.log("Кнопка 'Протестировать' нажата");
+
+            if (!validateForm(true)) {
+                // Если форма не валидна, сообщение об ошибке уже показывается в error-message
+                return;
+            }
+
+            document.getElementById("spinner-container").style.display = "block";
+
+            const formData = new FormData(document.getElementById("promptForm"));
+            fetch("{% url 'prompt_design:test_prompt' %}", {
+                method: "POST",
+                body: formData,
+                headers: {
+                    "X-CSRFToken": "{{ csrf_token }}"
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById("spinner-container").style.display = "none";
+
+                if (data.status === "error") {
+                    showErrorModal(data.message, data.details);
+                    return;
+                }
+
+                document.getElementById("apiStatus").textContent = data.status;
+                document.getElementById("apiPromptId").textContent = data.prompt_id || "N/A";
+
+                let responseElement = document.getElementById("apiResponse");
+                responseElement.textContent = JSON.stringify(data.response, null, 2);
+
+                let myModal = new bootstrap.Modal(document.getElementById("testModal"), { keyboard: true });
+                myModal.show();
+            })
+            .catch(error => {
+                document.getElementById("spinner-container").style.display = "none";
+                showErrorModal("Ошибка соединения с сервером", error);
+            });
+        });
+    });
+
+    function showErrorModal(message, details = "") {
+        document.getElementById("errorMessage").textContent = message;
+        document.getElementById("errorDetails").textContent = details;
+        let errorModal = new bootstrap.Modal(document.getElementById("errorModal"), { keyboard: true });
+        errorModal.show();
+    }
+  </script>
+{% endblock %}
