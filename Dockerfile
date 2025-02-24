@@ -15,7 +15,7 @@ RUN pip install -r requirements.txt
 VOLUME ["/app/db"]
 
 # Собираем статические файлы Django
-#RUN python manage.py collectstatic --noinput
+RUN python manage.py collectstatic --noinput
 
 # Открываем порт
 EXPOSE 8000
