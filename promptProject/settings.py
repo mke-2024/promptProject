@@ -32,6 +32,7 @@ if DEBUG:
     ALLOWED_HOSTS = ["*"]  # В продакшене указываем домен
 else:
     ALLOWED_HOSTS = ["185.174.220.122"]  # Разрешаем подключение только с этого IP
+    STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")  # Указываем папку для статики
 
 
 # Application definition
