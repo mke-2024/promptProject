@@ -26,9 +26,12 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = os.getenv('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = ["*"]  # В продакшене указываем домен
+if DEBUG:
+    ALLOWED_HOSTS = ["*"]  # В продакшене указываем домен
+else:
+    ALLOWED_HOSTS = ["185.174.220.122"]  # Разрешаем подключение только с этого IP
 
 
 # Application definition

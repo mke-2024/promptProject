@@ -5,6 +5,7 @@
         ".gitignore",
         "Dockerfile",
         "README.md",
+        "copy_to_server.bat",
         {
             "core": [
                 "utils.py"

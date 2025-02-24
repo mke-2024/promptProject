@@ -12,3 +12,4 @@ tests/
 # Django
 *.log
 db.sqlite3
+copy_to_server.bat
