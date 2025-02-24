@@ -1,12 +1,17 @@
 📂 promptProject
+    📄 .dockerignore
     📄 .env
     📄 .gitignore
+    📄 Dockerfile
     📄 README.md
     📂 core
         📄 utils.py
     📂 data
+    📂 db
     📄 db.sqlite3
+    📄 docker-compose.yml
     📄 manage.py
+    📄 nginx.conf
     📄 project_structure.txt
     📂 promptProject
         📄 __init__.py
@@ -33,3 +38,6 @@
         📄 tests.py
         📄 urls.py
         📄 views.py
+    📄 requirements.txt
+    📂 static
+        📄 favicon.ico

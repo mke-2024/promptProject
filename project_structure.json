@@ -1,7 +1,9 @@
 {
     "promptProject": [
+        ".dockerignore",
         ".env",
         ".gitignore",
+        "Dockerfile",
         "README.md",
         {
             "core": [
@@ -11,8 +13,13 @@
         {
             "data": []
         },
+        {
+            "db": []
+        },
         "db.sqlite3",
+        "docker-compose.yml",
         "manage.py",
+        "nginx.conf",
         "project_structure.txt",
         {
             "promptProject": [
@@ -55,6 +62,12 @@
                 "tests.py",
                 "urls.py",
                 "views.py"
+            ]
+        },
+        "requirements.txt",
+        {
+            "static": [
+                "favicon.ico"
             ]
         }
     ]
