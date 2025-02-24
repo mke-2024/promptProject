@@ -33,7 +33,13 @@ if DEBUG:
 else:
     ALLOWED_HOSTS = ["185.174.220.122"]  # Разрешаем подключение только с этого IP
     STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")  # Указываем папку для статики
-    CSRF_TRUSTED_ORIGINS = ["http://185.174.220.122", "http://localhost"]
+    CSRF_TRUSTED_ORIGINS = [
+        "http://185.174.220.122:8089",  # Указываем IP-адрес с портом
+        "http://185.174.220.122",  # Указываем IP-адрес без порта
+        "http://localhost",  # Разрешаем localhost
+        "http://127.0.0.1"  # Разрешаем локальный сервер
+    ]
+
 # Application definition
 
 INSTALLED_APPS = [
