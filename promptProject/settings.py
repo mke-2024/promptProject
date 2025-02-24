@@ -28,17 +28,55 @@ SECRET_KEY = os.getenv('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-if DEBUG:
-    ALLOWED_HOSTS = ["*"]  # В продакшене указываем домен
-else:
-    ALLOWED_HOSTS = ["185.174.220.122"]  # Разрешаем подключение только с этого IP
-    STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")  # Указываем папку для статики
-    CSRF_TRUSTED_ORIGINS = [
-        "http://185.174.220.122:8089",  # Указываем IP-адрес с портом
-        "http://185.174.220.122",  # Указываем IP-адрес без порта
-        "http://localhost",  # Разрешаем localhost
-        "http://127.0.0.1"  # Разрешаем локальный сервер
-    ]
+ALLOWED_HOSTS = ["185.174.220.122", "localhost", "127.0.0.1"]  # Разрешаем локальные запросы
+
+CSRF_TRUSTED_ORIGINS = [
+    "http://185.174.220.122:8089",  # Указываем IP-адрес с портом
+    "http://185.174.220.122",  # Указываем IP-адрес без порта
+    "http://localhost",  # Разрешаем localhost
+    "http://127.0.0.1",  # Разрешаем локальный сервер
+    "http://127.0.0.1:8089",
+    "http://localhost:8089"
+]
+
+# База данных (SQLite)
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),  # Хранится в Volume
+    }
+}
+
+# Логирование ошибок
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'file': {
+            'level': 'ERROR',
+            'class': 'logging.FileHandler',
+            'filename': os.path.join(BASE_DIR, 'django_errors.log'),
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['file'],
+            'level': 'ERROR',
+            'propagate': True,
+        },
+    },
+}
+
+# Настройки статики
+STATIC_URL = "/static/"
+STATICFILES_DIRS = [os.path.join(BASE_DIR, "static")]
+STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
+
+# Настройки аутентификации
+LOGIN_REDIRECT_URL = 'prompt_design:prompt_list'  # Куда перенаправлять после входа
+LOGOUT_REDIRECT_URL = 'home'
+# Включаем строгий редирект на логин для защищенных страниц
+LOGIN_URL = 'login'
 
 # Application definition
 
@@ -51,12 +89,6 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'prompt_design',
 ]
-
-# Настройки аутентификации
-LOGIN_REDIRECT_URL = 'prompt_design:prompt_list'  # Куда перенаправлять после входа
-LOGOUT_REDIRECT_URL = 'home'
-# Включаем строгий редирект на логин для защищенных страниц
-LOGIN_URL = 'login'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -91,23 +123,6 @@ WSGI_APPLICATION = 'promptProject.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/2.1/ref/settings/#databases
-
-if DEBUG:
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-        }
-    }
-else:
-    # SQLite база данных в volume
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': os.path.join('/app/db', 'db.sqlite3'),  # Указываем путь в volume
-        }
-    }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/2.1/ref/settings/#auth-password-validators
@@ -144,9 +159,6 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.1/howto/static-files/
-
-STATIC_URL = '/static/'
-STATICFILES_DIRS = [os.path.join(BASE_DIR, "static")]
 
 MODELS = {"OpenAI": [('gpt-4o', 'GPT-4o'), ('o1', 'o1'), ('o3-mini', 'o3-mini'), ('gpt-4', 'GPT-4'),
                      ('gpt-3.5-turbo', 'GPT-3.5 Turbo'), ],

@@ -7,10 +7,9 @@ services:
     restart: always
     volumes:
       - .:/app
-      - static_volume:/app/staticfiles  # Подключаем volume для статики
-      - db_volume:/app/db
+      - static_volume:/app/staticfiles  # Используем volume для статики
     expose:
-      - "8000"
+      - "8000"  # Gunicorn будет работать внутри контейнера
     command: ["gunicorn", "--bind", "0.0.0.0:8000", "promptProject.wsgi:application"]
 
   nginx:
@@ -21,10 +20,9 @@ services:
       - web
     volumes:
       - ./nginx.conf:/etc/nginx/conf.d/default.conf
-      - static_volume:/app/staticfiles  # Используем ту же папку
+      - static_volume:/app/staticfiles  # Nginx должен видеть статику
     ports:
-      - "8089:80"
+      - "8089:80"  # Проксируем на 8089
 
 volumes:
   static_volume:
-  db_volume:
