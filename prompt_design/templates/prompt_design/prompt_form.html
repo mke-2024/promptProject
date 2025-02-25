@@ -109,18 +109,47 @@
 document.addEventListener("DOMContentLoaded", function () {
     document.getElementById("copyResponse").addEventListener("click", function () {
         let responseText = document.getElementById("apiResponse").textContent;
-        navigator.clipboard.writeText(responseText).then(() => {
-            let toastEl = document.getElementById("copyToast");
-            let toast = new bootstrap.Toast(toastEl);
-            toast.show();
-        }).catch(err => {
-            console.error("Ошибка копирования: ", err);
-        });
+
+        // Пробуем использовать navigator.clipboard
+        if (navigator.clipboard && window.isSecureContext) {
+            navigator.clipboard.writeText(responseText).then(() => {
+                showToast("✅ Результат скопирован в буфер обмена!");
+            }).catch(err => {
+                console.error("Ошибка копирования через clipboard API: ", err);
+                fallbackCopyTextToClipboard(responseText);
+            });
+        } else {
+            fallbackCopyTextToClipboard(responseText);
+        }
     });
+
+    // Альтернативный метод копирования через textarea (если clipboard API не работает)
+    function fallbackCopyTextToClipboard(text) {
+        let textArea = document.createElement("textarea");
+        textArea.value = text;
+        textArea.style.position = "absolute";
+        textArea.style.left = "-9999px";
+        document.body.appendChild(textArea);
+        textArea.select();
+        try {
+            document.execCommand("copy");
+            showToast("✅ Результат скопирован в буфер обмена!");
+        } catch (err) {
+            console.error("Ошибка при копировании через execCommand: ", err);
+        }
+        document.body.removeChild(textArea);
+    }
+
+    // Функция для показа Bootstrap Toast
+    function showToast(message) {
+        let toastBody = document.querySelector("#copyToast .toast-body");
+        toastBody.textContent = message;
+        let toastEl = document.getElementById("copyToast");
+        let toast = new bootstrap.Toast(toastEl);
+        toast.show();
+    }
 });
-
 </script>
-
 
 <!-- Модальное окно для ошибок -->
 <div class="modal fade" id="errorModal" tabindex="-1" aria-labelledby="errorModalLabel" aria-hidden="true">
