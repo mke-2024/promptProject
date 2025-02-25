@@ -110,35 +110,28 @@ document.addEventListener("DOMContentLoaded", function () {
     document.getElementById("copyResponse").addEventListener("click", function () {
         let responseText = document.getElementById("apiResponse").textContent;
 
-        // Пробуем использовать navigator.clipboard
-        if (navigator.clipboard && window.isSecureContext) {
-            navigator.clipboard.writeText(responseText).then(() => {
-                showToast("✅ Результат скопирован в буфер обмена!");
-            }).catch(err => {
-                console.error("Ошибка копирования через clipboard API: ", err);
-                fallbackCopyTextToClipboard(responseText);
-            });
-        } else {
-            fallbackCopyTextToClipboard(responseText);
-        }
-    });
-
-    // Альтернативный метод копирования через textarea (если clipboard API не работает)
-    function fallbackCopyTextToClipboard(text) {
+        // Создаем временное скрытое поле для копирования
         let textArea = document.createElement("textarea");
-        textArea.value = text;
+        textArea.value = responseText;
         textArea.style.position = "absolute";
         textArea.style.left = "-9999px";
         document.body.appendChild(textArea);
         textArea.select();
+
         try {
-            document.execCommand("copy");
-            showToast("✅ Результат скопирован в буфер обмена!");
+            let successful = document.execCommand("copy");
+            if (successful) {
+                showToast("✅ Результат скопирован в буфер обмена!");
+            } else {
+                showToast("❌ Ошибка копирования! Попробуйте вручную.");
+            }
         } catch (err) {
-            console.error("Ошибка при копировании через execCommand: ", err);
+            console.error("Ошибка при копировании: ", err);
+            showToast("❌ Ошибка копирования! Попробуйте вручную.");
         }
+
         document.body.removeChild(textArea);
-    }
+    });
 
     // Функция для показа Bootstrap Toast
     function showToast(message) {
