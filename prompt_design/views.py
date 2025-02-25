@@ -25,6 +25,9 @@ OPENAI_URL = "https://api.openai.com/v1/chat/completions"
 API_KEY_GROK = os.getenv("API_KEY_GROK")
 GROK_URL = "https://api.x.ai/v1/chat/completions"
 
+API_KEY_DEEPSEEK = os.getenv("API_KEY_DEEPSEEK")
+DEEPSEEK_URL = "https://api.deepseek.com/v1/chat/completions"
+
 
 def register(request):
     if request.method == "POST":
@@ -213,15 +216,32 @@ def test_prompt(request):
                     {"role": "system", "content": developer_content},
                     {"role": "user", "content": user_content}
                 ],
-                "model": "grok-beta",
+                "model": model,
                 "stream": False,
                 "temperature": 0.1
             }
             response = requests.post(GROK_URL, headers=headers, json=data)
+
+        elif api_type == 'DeepSeek':
+            headers = {
+                "Content-Type": "application/json",
+                "Authorization": f"Bearer {API_KEY_DEEPSEEK}"
+            }
+
+            data = {
+                "model": model,
+                "messages": [
+                    {"role": "system", "content": developer_content},
+                    {"role": "user", "content": user_content}
+                ]
+            }
+
+            response = requests.post(DEEPSEEK_URL, headers=headers, data=json.dumps(data))
+
         else:
             return JsonResponse({
                 "status": "error",
-                "message": f"Ошибка в имени модели '{model}'",
+                "message": f"Ошибка в имени модели '{model}', не подходит доступным API",
             })
 
         try:

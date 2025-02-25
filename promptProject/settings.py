@@ -26,7 +26,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = os.getenv('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ["185.174.220.122", "localhost", "127.0.0.1"]  # Разрешаем локальные запросы
 
@@ -171,4 +171,6 @@ USE_TZ = True
 
 MODELS = {"OpenAI": [('gpt-4o', 'GPT-4o'), ('o1', 'o1'), ('o3-mini', 'o3-mini'), ('gpt-4', 'GPT-4'),
                      ('gpt-3.5-turbo', 'GPT-3.5 Turbo'), ],
-          "Grok": [('grok-beta', 'grok-beta'), ('grok-2-1212', 'grok-2'), ]}
+          "Grok": [('grok-beta', 'grok-beta'), ('grok-2-1212', 'grok-2'), ],
+          "DeepSeek": [('deepseek-chat', 'deepseek-chat'), ('deepseek-code', 'deepseek-code'),
+                       ('deepseek-math', 'deepseek-math'), ]}

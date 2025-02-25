@@ -1,0 +1,97 @@
+{
+    "case": [
+        {
+            "observation": {
+                "Какой день болеет": 1,
+                "Температура": 38.4,
+                "Боль в горле": "Да"
+            },
+            "response": {
+                "input_data": [
+                    "Какой день болеет: 1",
+                    "Температура: 38.4",
+                    "Боль в горле: Да"
+                ],
+                "recommendations": [
+                    {
+                        "diagnosis_code": "J02.9",
+                        "diagnosis_description": "Гострий фарингіт, неуточнений",
+                        "probability": "70%",
+                        "possible_causes": [
+                            "риновіруси",
+                            "аденовіруси",
+                            "менша ймовірність бактерій при 37°C"
+                        ],
+                        "general_treatment_recommendations": [
+                            "Тепле пиття",
+                            "Льодяники",
+                            "Спреї",
+                            "Полоскання горла",
+                            "Відпочинок",
+                            "Увлажнення повітря"
+                        ],
+                        "recommended_medications": [
+                            {
+                                "name": "Парацетамол 500 мг",
+                                "self_administered": true
+                            },
+                            {
+                                "name": "Ібупрофен 200 мг",
+                                "self_administered": true
+                            }
+                        ],
+                        "when_to_seek_medical_attention": [
+                            "Температура вище 39°C",
+                            "Сильний біль у горлі",
+                            "Відсутність покращення протягом 3 днів"
+                        ]
+                    },
+                    {
+                        "diagnosis_code": "J00",
+                        "diagnosis_description": "Гострий назофарингіт (звичайна застуда)",
+                        "probability": "30%",
+                        "possible_causes": [
+                            "риновіруси",
+                            "аденовіруси"
+                        ],
+                        "general_treatment_recommendations": [
+                            "Тепле пиття",
+                            "Льодяники",
+                            "Спреї",
+                            "Полоскання горла",
+                            "Відпочинок",
+                            "Увлажнення повітря"
+                        ],
+                        "recommended_medications": [
+                            {
+                                "name": "Парацетамол 500 мг",
+                                "self_administered": true
+                            },
+                            {
+                                "name": "Ібупрофен 200 мг",
+                                "self_administered": true
+                            }
+                        ],
+                        "when_to_seek_medical_attention": [
+                            "Температура вище 39°C",
+                            "Сильний біль у горлі",
+                            "Відсутність покращення протягом 3 днів"
+                        ]
+                    }
+                ],
+                "red_flag": false,
+                "additional_symptoms_to_check": [
+                    {
+                        "symptom": "Кашель",
+                        "importance": "середня"
+                    },
+                    {
+                        "symptom": "Нежить",
+                        "importance": "низька"
+                    }
+                ],
+                "disclaimer": "Отказ від відповідальності: Я не лікар, це загальна інформація. Зверніться до лікаря."
+            }
+        }
+    ]
+}
