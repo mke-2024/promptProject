@@ -3,109 +3,146 @@
 {% block title %}{% if edit_mode %}Редактирование{% else %}Создание{% endif %} промпта{% endblock %}
 
 {% block content %}
-  <div class="container">
+<div class="container">
     <h1 class="mb-4">{% if edit_mode %}Редактирование{% else %}Создание{% endif %} промпта</h1>
 
     <form id="promptForm" method="post">
-      {% csrf_token %}
-      <input type="hidden" name="prompt_id" value="{{ prompt.id|default:'' }}">
+        {% csrf_token %}
+        <input type="hidden" name="prompt_id" value="{{ prompt.id|default:'' }}">
 
-      <div class="mb-3">
-        {{ form.title.label_tag }}
-        {{ form.title }}
-      </div>
-      <div class="mb-3">
-        {{ form.model.label_tag }}
-        {{ form.model }}
-      </div>
-      <div class="mb-3">
-        {{ form.developer_content.label_tag }}
-        {{ form.developer_content }}
-      </div>
-      <div class="mb-3">
-        {{ form.user_content.label_tag }}
-        {{ form.user_content }}
-      </div>
-
-      <!-- Поле "Инструкция препарата" с кнопкой очистки -->
-      <div class="mb-3 position-relative">
-        {{ form.drug_instruction.label_tag }}
-        <div class="d-flex">
-          {{ form.drug_instruction }}
-          <button type="button" class="btn btn-outline-danger ms-2" id="clearInstruction" style="display: none;">
-            Очистить
-          </button>
+        <div class="mb-3">
+            {{ form.title.label_tag }}
+            {{ form.title }}
         </div>
-      </div>
-
-      <div class="mb-3">
-        {{ form.temperature.label_tag }}
-        {{ form.temperature }}
-      </div>
-      <div class="mb-3">
-        {{ form.max_tokens.label_tag }}
-        {{ form.max_tokens }}
-      </div>
-
-      <button type="submit" class="btn btn-success">Сохранить</button>
-      <button type="button" class="btn btn-info" id="testPrompt">Протестировать</button>
-
-      <!-- Спиннер (изначально скрыт) -->
-      <div id="spinner-container" class="text-center mt-3" style="display: none;">
-        <div class="spinner-border text-primary" role="status" style="width: 4rem; height: 4rem;">
-          <span class="visually-hidden">Загрузка...</span>
+        <div class="mb-3">
+            {{ form.model.label_tag }}
+            {{ form.model }}
         </div>
-        <p class="mt-2">Тестирование выполняется, подождите...</p>
-      </div>
+        <div class="mb-3">
+            {{ form.developer_content.label_tag }}
+            {{ form.developer_content }}
+        </div>
+        <div class="mb-3">
+            {{ form.user_content.label_tag }}
+            {{ form.user_content }}
+        </div>
 
-      <p id="error-message" class="text-danger mt-3" style="display: none;">Пожалуйста, заполните все обязательные поля.</p>
+        <!-- Поле "Инструкция препарата" с кнопкой очистки -->
+        <div class="mb-3 position-relative">
+            {{ form.drug_instruction.label_tag }}
+            <div class="d-flex">
+                {{ form.drug_instruction }}
+                <button type="button" class="btn btn-outline-danger ms-2" id="clearInstruction" style="display: none;">
+                    Очистить
+                </button>
+            </div>
+        </div>
+
+        <div class="mb-3">
+            {{ form.temperature.label_tag }}
+            {{ form.temperature }}
+        </div>
+        <div class="mb-3">
+            {{ form.max_tokens.label_tag }}
+            {{ form.max_tokens }}
+        </div>
+
+        <button type="submit" class="btn btn-success">Сохранить</button>
+        <button type="button" class="btn btn-info" id="testPrompt">Протестировать</button>
+
+        <!-- Спиннер (изначально скрыт) -->
+        <div id="spinner-container" class="text-center mt-3" style="display: none;">
+            <div class="spinner-border text-primary" role="status" style="width: 4rem; height: 4rem;">
+                <span class="visually-hidden">Загрузка...</span>
+            </div>
+            <p class="mt-2">Тестирование выполняется, подождите...</p>
+        </div>
+
+        <p id="error-message" class="text-danger mt-3" style="display: none;">Пожалуйста, заполните все обязательные
+            поля.</p>
     </form>
 
     <a href="{% url 'prompt_design:prompt_list' %}" class="btn btn-secondary mt-3">Назад</a>
-  </div>
+</div>
 
-  <!-- Модальное окно для результата тестирования -->
-  <div class="modal fade" id="testModal" tabindex="-1" aria-labelledby="testModalLabel" aria-hidden="true">
+<!-- Модальное окно для результата тестирования -->
+<div class="modal fade" id="testModal" tabindex="-1" aria-labelledby="testModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="testModalLabel">Результат тестирования</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="testModalLabel">Результат тестирования</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+            </div>
+            <div class="modal-body">
+                <div class="text-muted small mb-2">
+                    <strong>Status:</strong> <span id="apiStatus">Загрузка...</span> |
+                    <strong>Prompt ID:</strong> <span id="apiPromptId">Загрузка...</span>
+                </div>
+                <pre id="apiResponse" class="p-3 bg-light border rounded"
+                     style="white-space: pre-wrap; word-wrap: break-word; max-height: 500px; overflow-y: auto;">
+                    Загрузка...
+                </pre>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="copyResponse">Скопировать результат</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+            </div>
         </div>
-        <div class="modal-body">
-          <div class="text-muted small mb-2">
-            <strong>Status:</strong> <span id="apiStatus">Загрузка...</span> |
-            <strong>Prompt ID:</strong> <span id="apiPromptId">Загрузка...</span>
-          </div>
-          <pre id="apiResponse" class="p-3 bg-light border rounded" style="white-space: pre-wrap; word-wrap: break-word; max-height: 500px; overflow-y: auto;">Загрузка...</pre>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
-        </div>
-      </div>
     </div>
-  </div>
+</div>
 
-  <!-- Модальное окно для ошибок -->
-  <div class="modal fade" id="errorModal" tabindex="-1" aria-labelledby="errorModalLabel" aria-hidden="true">
+<!-- Bootstrap Toast для уведомления -->
+<div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+    <div id="copyToast" class="toast align-items-center text-white bg-success border-0" role="alert"
+         aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+            <div class="toast-body">
+                ✅ Результат тестирования скопирован в буфер обмена!
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"
+                    aria-label="Закрыть"></button>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    document.getElementById("copyResponse").addEventListener("click", function () {
+        let responseText = document.getElementById("apiResponse").textContent;
+        navigator.clipboard.writeText(responseText).then(() => {
+            let toastEl = document.getElementById("copyToast");
+            let toast = new bootstrap.Toast(toastEl);
+            toast.show();
+        }).catch(err => {
+            console.error("Ошибка копирования: ", err);
+        });
+    });
+});
+
+</script>
+
+
+<!-- Модальное окно для ошибок -->
+<div class="modal fade" id="errorModal" tabindex="-1" aria-labelledby="errorModalLabel" aria-hidden="true">
     <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header bg-danger text-white">
-          <h5 class="modal-title" id="errorModalLabel">Ошибка</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="errorModalLabel">Ошибка</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+            </div>
+            <div class="modal-body">
+                <p id="errorMessage">Неизвестная ошибка</p>
+                <pre id="errorDetails" class="p-3 bg-light border rounded"
+                     style="white-space: pre-wrap; word-wrap: break-word; max-height: 400px; overflow-y: auto;"></pre>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+            </div>
         </div>
-        <div class="modal-body">
-          <p id="errorMessage">Неизвестная ошибка</p>
-          <pre id="errorDetails" class="p-3 bg-light border rounded" style="white-space: pre-wrap; word-wrap: break-word; max-height: 400px; overflow-y: auto;"></pre>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
-        </div>
-      </div>
     </div>
-  </div>
+</div>
 
-  <script>
+<script>
     function validateForm(isTesting = false) {
         let isValid = true;
         // Проверяем обязательные поля, имеющие атрибут required (если таковые заданы в форме)
@@ -200,5 +237,6 @@
         let errorModal = new bootstrap.Modal(document.getElementById("errorModal"), { keyboard: true });
         errorModal.show();
     }
-  </script>
+
+</script>
 {% endblock %}

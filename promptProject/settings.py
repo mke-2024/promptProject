@@ -26,9 +26,19 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = os.getenv('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ["185.174.220.122", "localhost", "127.0.0.1"]  # Разрешаем локальные запросы
+
+if DEBUG:
+    ALLOWED_HOSTS = []
+
+# Отключаем требование HTTPS для куки
+SESSION_COOKIE_SECURE = False  # True только если используем HTTPS
+CSRF_COOKIE_SECURE = False  # True только если используем HTTPS
+
+# Разрешаем доступ к сессионным кукам из любого источника
+SESSION_COOKIE_SAMESITE = None
 
 CSRF_TRUSTED_ORIGINS = [
     "http://185.174.220.122:8089",  # Указываем IP-адрес с портом
@@ -36,7 +46,9 @@ CSRF_TRUSTED_ORIGINS = [
     "http://localhost",  # Разрешаем localhost
     "http://127.0.0.1",  # Разрешаем локальный сервер
     "http://127.0.0.1:8089",
-    "http://localhost:8089"
+    "http://localhost:8089",
+    "http://127.0.0.1:8000",
+    "http://localhost:8000"
 ]
 
 # База данных (SQLite)
@@ -48,24 +60,25 @@ DATABASES = {
 }
 
 # Логирование ошибок
-LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False,
-    'handlers': {
-        'file': {
-            'level': 'ERROR',
-            'class': 'logging.FileHandler',
-            'filename': os.path.join(BASE_DIR, 'django_errors.log'),
+if not DEBUG:
+    LOGGING = {
+        'version': 1,
+        'disable_existing_loggers': False,
+        'handlers': {
+            'file': {
+                'level': 'ERROR',
+                'class': 'logging.FileHandler',
+                'filename': os.path.join(BASE_DIR, 'django_errors.log'),
+            },
         },
-    },
-    'loggers': {
-        'django': {
-            'handlers': ['file'],
-            'level': 'ERROR',
-            'propagate': True,
+        'loggers': {
+            'django': {
+                'handlers': ['file'],
+                'level': 'ERROR',
+                'propagate': True,
+            },
         },
-    },
-}
+    }
 
 # Настройки статики
 STATIC_URL = "/static/"
@@ -119,10 +132,6 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'promptProject.wsgi.application'
-
-
-# Database
-# https://docs.djangoproject.com/en/2.1/ref/settings/#databases
 
 # Password validation
 # https://docs.djangoproject.com/en/2.1/ref/settings/#auth-password-validators
